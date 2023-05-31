@@ -1,0 +1,25 @@
+{% extends 'blog/base.html' %}
+
+{% block content %}
+  <h1>{{ title }}</h1>
+
+  <form action="{% url 'add_page' %}" method="post" enctype="multipart/form-data" class="mt-4">
+    {% csrf_token %}
+
+    <table class="table">
+      {% for f in form %}
+      <tr>
+        <td><label for="{{ f.title.id_for_label }}">{{ f.label }}</label></td>
+        <td>{{ f }}
+      <div class="text-danger">{{ f.errors }}</div></td>
+      </tr>
+      {% endfor %}
+    </table>
+
+
+    <button type="submit" class="btn btn-primary">Добавить</button>
+  </form>
+{% endblock %}
+
+
+

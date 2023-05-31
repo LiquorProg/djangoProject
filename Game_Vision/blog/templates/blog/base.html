@@ -1,0 +1,48 @@
+{% load blog_tags %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}My Django App{% endblock %}</title>
+    {% load bootstrap4 %}
+    {% bootstrap_css %}
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="{% url 'home' %}">Game Vision</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                {% for m in menu %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url m.url_name %}">{{ m.title }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-3">
+                <nav class="navbar navbar-light bg-light flex-md-column">
+                    <ul class="navbar-nav flex-md-column">
+
+                        {% show_categories 'name' cat_selected %}
+
+                    </ul>
+                </nav>
+            </div>
+            <div class="col-md-9">
+                <div class="container">
+                    {% block content %}
+                    {% endblock %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% bootstrap_javascript jquery='full' %}
+</body>
+</html>

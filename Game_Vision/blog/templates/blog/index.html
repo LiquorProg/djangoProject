@@ -1,0 +1,25 @@
+{% extends 'blog/base.html' %}
+
+{% block content %}
+  <h1>Добро пожаловать на блог об играх!</h1>
+
+  <ul class="list-articles">
+  <div class="article-list">
+    {% for post in posts %}
+      <div class="article">
+        <h2>{{ post.title }}</h2>
+        <p>{{ post.time_update }}</p>
+
+        {% if post.photo %}
+	    <p><img class="img-article-left thumb" src="{{post.photo.url}}"></p>
+        {% endif %}
+
+        {% autoescape on %}
+	    <p>{{post.content|linebreaks|truncatewords:50}}</p>
+	    {% endautoescape %}
+        <p class="link-read-post"><a href="{{ post.get_absolute_url }}">Читать полностью</a></p>
+      </div>
+    {% endfor %}
+  </div>
+  </ul>
+{% endblock %}
