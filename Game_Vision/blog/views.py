@@ -1,35 +1,37 @@
 from django.shortcuts import render, redirect
+from django.views.generic import ListView, DetailView, CreateView
 
 from .forms import AddPostForm
 from .models import *
-
+from .utils import DataMixin
 
 menu = [{'title': "О сайте", 'url_name': 'about'},
         {'title': "Добавить статью", 'url_name': 'add_page'},
         {'title': "Обратная связь", 'url_name': 'contact'},
 ]
 
-def index(request):
-    posts = Blog.objects.all()
+class BlogHome(DataMixin, ListView):
+    model = Blog
+    template_name = 'blog/index.html'
+    context_object_name = 'posts'
 
-    context = {
-        'posts': posts,
-        'menu': menu,
-        'title': 'Главная страница',
-        'cat_selected': 0,
-    }
-    return render(request, 'blog/index.html', context=context)
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(title="Главная страница")
+        return dict(list(context.items()) + list(c_def.items()))
 
-def addpage(request):
-    if request.method == 'POST':
-        form = AddPostForm(request.POST, request.FILES)
-        if form.is_valid():
-            #print(form.cleaned_data)
-            form.save()
-            return redirect('home')
-    else:
-        form = AddPostForm()
-    return render(request, 'blog/addpage.html', {'form': form, 'menu': menu, 'title': 'Добавление статьи'})
+    def get_queryset(self):
+        return Blog.objects.filter(is_published=True)
+
+class AddPage(DataMixin, CreateView):
+    form_class = AddPostForm
+    template_name = 'blog/addpage.html'
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(title="Добавление статьи")
+        return dict(list(context.items()) + list(c_def.items()))
+
 
 def contact(request):
 
@@ -47,26 +49,29 @@ def about(request):
     }
     return render(request, 'blog/about.html', context=context)
 
-def show_post(request, post_slug):
-    post = Blog.objects.filter(slug=post_slug)
+class ShowPost(DataMixin, DetailView):
+    model = Blog
+    template_name = 'blog/post.html'
+    slug_url_kwarg = 'post_slug'
+    context_object_name = 'post'
 
-    context = {
-        'post': post[0],
-        'menu': menu,
-        'title': 'Пост',
-    }
-    return render(request, 'blog/post.html', context=context)
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(title=context["post"])
+        return dict(list(context.items()) + list(c_def.items()))
 
-def blog_category(request, cat_slug):
-    posts = Blog.objects.filter(cat__slug=cat_slug)
-    cat_id = Category.objects.filter(slug=cat_slug)[0].pk
 
-    print(cat_id)
+class BlogCategory(DataMixin, ListView):
+    model = Blog
+    template_name = 'blog/index.html'
+    context_object_name = 'posts'
+    allow_empty = False
 
-    context = {
-        'posts': posts,
-        'menu': menu,
-        'title': 'Категория',
-        'cat_selected': cat_id,
-    }
-    return render(request, 'blog/index.html', context=context)
+    def get_queryset(self):
+        return Blog.objects.filter(cat__slug=self.kwargs['cat_slug'], is_published=True).select_related('cat')
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(title="Категория - " + str(context["posts"][0].cat),
+                                      cat_selected=context["posts"][0].cat_id)
+        return dict(list(context.items()) + list(c_def.items()))

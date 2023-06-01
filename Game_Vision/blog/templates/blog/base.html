@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>{% block title %}My Django App{% endblock %}</title>
+    <title>{{title}}</title>
     {% load bootstrap4 %}
     {% bootstrap_css %}
 </head>
@@ -20,6 +20,10 @@
                 </li>
                 {% endfor %}
             </ul>
+        </div>
+        <div class="ml-auto">
+            <a class="btn btn-primary" href="#">Войти</a>
+            <a class="btn btn-secondary" href="#">Регистрация</a>
         </div>
     </nav>
 
