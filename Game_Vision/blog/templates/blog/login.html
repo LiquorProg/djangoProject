@@ -1,0 +1,22 @@
+{% extends 'blog/base.html' %}
+
+{% block content %}
+<h1 class="mt-4">{{title}}</h1>
+
+<form method="post" class="mt-5">
+    {% csrf_token %}
+
+<div class="text-danger">{{ form.non_field_errors }}</div>
+<table class="table">
+    {% for f in form.visible_fields %}
+    <tr>
+        <td>{{ f.label }}</td>
+        <td>{{ f }}</td>
+        <td class="text-danger">{{ f.errors }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<button type="submit" class="btn btn-primary">Войти</button>
+
+{% endblock %}

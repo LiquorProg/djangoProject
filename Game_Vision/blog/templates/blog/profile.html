@@ -1,0 +1,14 @@
+{% extends 'blog/base.html' %}
+
+{% block content %}
+  <h1>Профиль пользователя</h1>
+
+  <div class="profile-info">
+    <h3>{{ user.username }}</h3>
+    <p>Email: {{ user.email }}</p>
+    <!-- Добавьте другие данные профиля, если необходимо -->
+
+    <!-- Пример кнопки для редактирования профиля -->
+    <a href="#" class="btn btn-primary">Редактировать профиль</a>
+  </div>
+{% endblock %}
