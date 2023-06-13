@@ -1,50 +1,60 @@
 {% extends 'blog/base.html' %}
+{% load static %}
 
 {% block content %}
-  <h1>Добро пожаловать на блог об играх!</h1>
+<!--  <h1>Ласкаво просимо в блог про ігри!</h1>-->
 
-<form method="GET" action="{% url 'home' %}" class="mb-4">
+<!-- Форма для поиска постов и их сортировки -->
+<form method="GET" action="{{ request.path }}" class="mb-4">
   <div class="row">
     <div class="col-md-4 mb-2">
       <div class="input-group">
-        <input type="text" name="search" class="form-control" placeholder="Поиск">
+        <input type="text" name="search" class="form-control" placeholder="Поиск" value="{{ form.search.value }}">
         <div class="input-group-append">
-          <button type="submit" class="btn btn-primary">Найти</button>
+          <button type="submit" class="btn btn-primary">Знайти</button>
         </div>
       </div>
     </div>
     <div class="col-md-4 mb-2">
-      <select name="filter" class="form-control">
-        <option value="cat">По категории</option>
-        <option value="author">По автору</option>
-        <!-- Добавьте другие варианты фильтрации, если нужно -->
-      </select>
-    </div>
-    <div class="col-md-4 mb-2">
       <select name="sort" class="form-control">
-        <option value="latest">По дате (новые)</option>
-        <option value="oldest">По дате (старые)</option>
-        <!-- Добавьте другие варианты сортировки, если нужно -->
+        <option value="latest" {% if form.sort.value == 'latest' %}selected{% endif %}>По даті (нові)</option>
+        <option value="oldest" {% if form.sort.value == 'oldest' %}selected{% endif %}>По даті (старі)</option>
       </select>
     </div>
   </div>
 </form>
 
-  <div class="row">
-    {% for post in posts %}
-      <div class="col-md-6">
-        <div class="card mb-4">
-          {% if post.photo %}
-            <img class="card-img-top" src="{{ post.photo.url }}" alt="{{ post.title }}">
-          {% endif %}
-          <div class="card-body">
-            <h2 class="card-title">{{ post.title }}</h2>
-            <p class="card-text">{{ post.time_update }}</p>
-            <p class="card-text">{{ post.content|linebreaks|truncatewords:50 }}</p>
-            <a href="{{ post.get_absolute_url }}" class="btn btn-primary">Читать полностью</a>
-          </div>
+<!-- Отображение списка постов в виде карточек с краткой информацией -->
+<div class="row">
+  {% for post in posts %}
+    <div class="col-md-6">
+      <div class="card mb-4">
+        {% if post.photo %}
+          <img class="card-img-top" src="{{ post.photo.url }}" alt="{{ post.title }}">
+        {% endif %}
+        <div class="card-body">
+          <h2 class="card-title">{{ post.title }}</h2>
+          <p class="card-text">
+            <span class="text-muted">{{ post.time_update }}</span>
+            <div class="card-meta">
+              <span class="card-author">
+                <img src="https://img.shields.io/badge/-%D0%90%D0%B2%D1%82%D0%BE%D1%80-blue" alt="Автор">
+                <strong>{{ post.user.username }}</strong>
+              </span>
+          <br>
+              <span class="card-category">
+                <img src="https://img.shields.io/badge/-%D0%9A%D0%B0%D1%82%D0%B5%D0%B3%D0%BE%D1%80%D1%96%D1%8F-lightgrey" alt="Категорія">
+                <strong>{{ post.cat.name }}</strong>
+              </span>
+            </div>
+          </p>
+          <p class="card-text">{{ post.content|linebreaks|truncatewords:50 }}</p>
+          <a href="{{ post.get_absolute_url }}" class="btn btn-primary">Читати Повністю</a>
         </div>
       </div>
-    {% endfor %}
-  </div>
+    </div>
+  {% empty %}
+          <p class="no-posts-message">Тут поки-що нема постів :(</p>
+  {% endfor %}
+</div>
 {% endblock %}

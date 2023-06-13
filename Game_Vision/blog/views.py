@@ -1,93 +1,41 @@
 from django.contrib.auth import logout, login
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
-from django.views.generic import ListView, DetailView, CreateView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 
-from .forms import AddPostForm, RegisterUserForm, LoginUserForm
+from .forms import AddPostForm, RegisterUserForm, LoginUserForm, PostSearchForm, UpdatePostForm
 from .models import *
-from .utils import DataMixin
-from django.db.models import Q
+from .utils import DataMixin, SearchMixin
 
-menu = [{'title': "О сайте", 'url_name': 'about'},
-        {'title': "Добавить статью", 'url_name': 'add_page'},
-        {'title': "Обратная связь", 'url_name': 'contact'},
-]
 
-class BlogHome(DataMixin, ListView):
+class BlogHome(SearchMixin, DataMixin, ListView):  # Класс представления основной страницы
     model = Blog
     template_name = 'blog/index.html'
     context_object_name = 'posts'
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        c_def = self.get_user_context(title="Главная страница")
-
-        # Обработка поиска
-        search_query = self.request.GET.get('search')
-        if search_query:
-            context['search_query'] = search_query
-
-        # Обработка фильтрации
-        filter_option = self.request.GET.get('filter')
-        if filter_option:
-            context['filter_option'] = filter_option
-
-        # Обработка сортировки
-        sort_option = self.request.GET.get('sort')
-        if sort_option:
-            context['sort_option'] = sort_option
-
+        c_def = self.get_user_context(title="Головна сторінка")
         return dict(list(context.items()) + list(c_def.items()))
 
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        queryset = queryset.filter(is_published=True)
 
-        # Обработка поиска
-        search_query = self.request.GET.get('search')
-        if search_query:
-            queryset = queryset.filter(Q(title__icontains=search_query) | Q(content__icontains=search_query))
-
-        # Обработка фильтрации
-        filter_option = self.request.GET.get('filter')
-        if filter_option == 'cat':
-            queryset = queryset.order_by('cat')
-        # elif filter_option == 'author':
-        #     queryset = queryset.order_by('author')
-
-        # Обработка сортировки
-        sort_option = self.request.GET.get('sort')
-        if sort_option == 'latest':
-            queryset = queryset.order_by('-time_update')
-        elif sort_option == 'oldest':
-            queryset = queryset.order_by('time_update')
-
-        return queryset
-
-class AddPage(DataMixin, CreateView):
+class AddPage(DataMixin, LoginRequiredMixin, CreateView):  # Класс представления страницы создания нового поста
     form_class = AddPostForm
     template_name = 'blog/addpage.html'
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        c_def = self.get_user_context(title="Добавление статьи")
+        c_def = self.get_user_context(title="Додавання статті")
         return dict(list(context.items()) + list(c_def.items()))
 
-
-class Contact(DataMixin, ListView):
-    paginate_by = 0
-    model = Blog
-    template_name = 'blog/contact.html'
-    context_object_name = 'posts'
-
-    def get_context_data(self, *, object_list=None, **kwargs):
-        context = super().get_context_data(**kwargs)
-        c_def = self.get_user_context(title='Обратная связь')
-        return dict(list(context.items()) + list(c_def.items()))
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        return super().form_valid(form)
 
 
-class About(DataMixin, ListView):
+class About(DataMixin, ListView):  # Класс представления страницы об сайте
     paginate_by = 0
     model = Blog
     template_name = 'blog/about.html'
@@ -95,11 +43,11 @@ class About(DataMixin, ListView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        c_def = self.get_user_context(title='О сайте')
+        c_def = self.get_user_context(title='Про сайт')
         return dict(list(context.items()) + list(c_def.items()))
 
 
-class ShowPost(DataMixin, DetailView):
+class ShowPost(DataMixin, DetailView):  # Класс представления страницы поста
     model = Blog
     template_name = 'blog/post.html'
     slug_url_kwarg = 'post_slug'
@@ -111,30 +59,35 @@ class ShowPost(DataMixin, DetailView):
         return dict(list(context.items()) + list(c_def.items()))
 
 
-class BlogCategory(DataMixin, ListView):
+class BlogCategory(SearchMixin, DataMixin, ListView):  # Класс представления для отображения постов по категориям
     model = Blog
     template_name = 'blog/index.html'
     context_object_name = 'posts'
-    allow_empty = False
 
     def get_queryset(self):
-        return Blog.objects.filter(cat__slug=self.kwargs['cat_slug'], is_published=True).select_related('cat')
+        queryset = super().get_queryset()
+        cat_queryset = queryset.filter(cat__slug=self.kwargs['cat_slug'], is_published=True).select_related('cat')
+        return cat_queryset
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        c_def = self.get_user_context(title="Категория - " + str(context["posts"][0].cat),
-                                      cat_selected=context["posts"][0].cat_id)
+        if context["posts"]:
+            c_def = self.get_user_context(title="Категорія - " + str(context["posts"][0].cat),
+                                          cat_selected=context["posts"][0].cat_id)
+        else:
+            c_def = self.get_user_context(title="Пошук по категорії")
+
         return dict(list(context.items()) + list(c_def.items()))
 
 
-class RegisterUser(DataMixin, CreateView):
+class RegisterUser(DataMixin, CreateView):  # Класс представления страницы регистрации
     form_class = RegisterUserForm
     template_name = 'blog/register.html'
     success_url = reverse_lazy('home')
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        c_def = self.get_user_context(title="Регистрация")
+        c_def = self.get_user_context(title="Реєстрація")
         return dict(list(context.items()) + list(c_def.items()))
 
     def form_valid(self, form):
@@ -143,13 +96,13 @@ class RegisterUser(DataMixin, CreateView):
         return redirect('home')
 
 
-class LoginUser(DataMixin, LoginView):
+class LoginUser(DataMixin, LoginView):  # Класс представления страницы авторизации
     form_class = LoginUserForm
     template_name = 'blog/login.html'
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        c_def = self.get_user_context(title="Авторизация")
+        c_def = self.get_user_context(title="Авторизація")
         return dict(list(context.items()) + list(c_def.items()))
 
     def get_success_url(self):
@@ -160,12 +113,64 @@ def logout_user(request):
     logout(request)
     return redirect('login')
 
-class UserProfile(DataMixin, LoginView):
+
+class UserProfile(DataMixin, LoginRequiredMixin, LoginView):  # Класс представления страницы профиля пользователя
     model = Blog
     template_name = 'blog/profile.html'
     context_object_name = 'posts'
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        c_def = self.get_user_context(title='О сайте')
+        c_def = self.get_user_context(title='Про сайт')
         return dict(list(context.items()) + list(c_def.items()))
+
+
+class UserPostListView(DataMixin, SearchMixin, LoginRequiredMixin, ListView):  # Класс представления страницы с постами пользователя
+    model = Blog
+    template_name = 'blog/index.html'
+    context_object_name = 'posts'
+    paginate_by = 4
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(title='Пости користувача')
+        return dict(list(context.items()) + list(c_def.items()))
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        cat_queryset = queryset.filter(user=self.request.user, is_published=True)
+        return cat_queryset
+
+
+class EditPostView(DataMixin, LoginRequiredMixin, UpdateView):  # Класс представления страницы для редактирования поста
+    model = Blog
+    form_class = UpdatePostForm
+    template_name = 'blog/edit_post.html'
+    slug_url_kwarg = 'post_slug'
+    context_object_name = 'post'
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(title='Редагування посту')
+        return dict(list(context.items()) + list(c_def.items()))
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return queryset.filter(user=self.request.user)
+
+
+class DeletePostView(DataMixin, LoginRequiredMixin, DeleteView):  # Класс представления страницы для удаления поста
+    model = Blog
+    template_name = 'blog/delete_post.html'
+    slug_url_kwarg = 'post_slug'
+    context_object_name = 'post'
+    success_url = reverse_lazy('home')
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(title='Видалення посту')
+        return dict(list(context.items()) + list(c_def.items()))
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return queryset.filter(user=self.request.user)

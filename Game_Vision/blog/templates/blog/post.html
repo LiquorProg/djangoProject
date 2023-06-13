@@ -1,20 +1,34 @@
 {% extends 'blog/base.html' %}
 
 {% block content %}
-  <ul class="list-articles">
-  <div class="article-list">
-      <div class="article">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12 offset-md-0">
         <h2>{{ post.title }}</h2>
         <p>{{ post.time_update }}</p>
-
+        <img src="https://img.shields.io/badge/-%D0%90%D0%B2%D1%82%D0%BE%D1%80-blue" alt="Автор">
+                <strong>{{ post.user.username }}</strong>
+        <br>
+        <img src="https://img.shields.io/badge/-%D0%9A%D0%B0%D1%82%D0%B5%D0%B3%D0%BE%D1%80%D1%96%D1%8F-lightgrey" alt="Категорія">
+                <strong>{{ post.cat.name }}</strong>
+        <hr>
         {% if post.photo %}
-	    <p><img class="img-article-left thumb" src="{{post.photo.url}}"></p>
+          <img class="img-fluid" src="{{ post.photo.url }}" alt="{{ post.title }}">
         {% endif %}
-
         {% autoescape on %}
-	    <p>{{post.content|linebreaks}}</p>
-	    {% endautoescape %}
+          <div class="content-text">{{ post.content|linebreaks }}</div>
+        {% endautoescape %}
+
+          <div class="row">
+            <div class="col-lg-6">
+              {% if post.user == request.user %}
+                <a href="{% url 'edit_post' post_slug=post.slug %}" class="btn btn-primary">Редагувати</a>
+                <a href="{% url 'delete_post' post_slug=post.slug %}" class="btn btn-danger">Видалити</a>
+              {% endif %}
+            </div>
+          </div>
+
       </div>
+    </div>
   </div>
-  </ul>
 {% endblock %}

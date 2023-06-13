@@ -77,14 +77,17 @@ WSGI_APPLICATION = 'Game_Vision.wsgi.application'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
- 'default': {
- 'ENGINE': 'django.db.backends.postgresql_psycopg2',
- 'NAME': 'blog_db',
- 'USER': 'blog_user',
- 'PASSWORD': 'Liquor8578',
- 'HOST': 'localhost',
- 'PORT': '',
- }
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'blog_db',
+        'USER': 'blog_user',
+        'PASSWORD': 'mypassword',
+        'HOST': 'localhost',
+        'PORT': '',
+        'TEST': {
+            'NAME': 'test_db',
+        },
+    },
 }
 
 
@@ -133,3 +136,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': os.path.join(BASE_DIR, 'gv_cache'),
+    }
+}
