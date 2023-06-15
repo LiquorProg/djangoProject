@@ -5,8 +5,8 @@ from slugify import slugify
 
 
 class Blog(models.Model):
-    title = models.CharField(max_length=255, verbose_name="Заголовок")
-    slug = models.SlugField(max_length=255, unique=True, db_index=True, verbose_name="URL")
+    title = models.CharField(max_length=160, verbose_name="Заголовок")
+    slug = models.SlugField(max_length=160, unique=True, db_index=True, verbose_name="URL")
     content = models.TextField(blank=True, verbose_name="Текст статті")
     photo = models.ImageField(upload_to="photos/%Y/%m/%d/", verbose_name="Фото")
     time_create = models.DateTimeField(auto_now_add=True, verbose_name="Час створення")
@@ -18,7 +18,6 @@ class Blog(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:  # проверяем, не заполнено ли поле slug
             self.slug = slugify(self.title)  # генерируем slug из поля title
-            print(self.slug, "<---------------------- ТУТ")
         super().save(*args, **kwargs)
 
     def __str__(self):
