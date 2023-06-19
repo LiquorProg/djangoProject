@@ -20,8 +20,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-a5xhm@*1eqyu!t(mgs!a+0a_^$egyf+023&l6@7c5h2ot#qex#'
+SECRET_KEY = 'django-insecure-a5xhm@*1eqyu!t(mgs!a+0a_^$egyf+023&l6@7c5h2ot#qex#'  # ключ для локального сервера
 
+# Ключ в переменных окружения на хостинге
 # SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -92,6 +93,20 @@ DATABASES = {
     },
 }
 
+# На хостинге я использую БД mysql и пароль беру из переменных окружения хостинга
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'LiquorProg$blog_db',
+#         'USER': 'LiquorProg',
+#         'PASSWORD': os.environ.get('DB_PASSWORD'),
+#         'HOST': 'LiquorProg.mysql.pythonanywhere-services.com',
+#         'PORT': '3306',
+#         'TEST': {
+#             'NAME': 'test_db',
+#         },
+#     },
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
