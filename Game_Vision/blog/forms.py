@@ -18,6 +18,7 @@ class AddPostForm(forms.ModelForm):
             'content': forms.Textarea(attrs={'cols': 60, 'rows': 10}),
         }
 
+
 class UpdatePostForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -30,6 +31,7 @@ class UpdatePostForm(forms.ModelForm):
             'title': forms.TextInput(attrs={'class': 'form-input'}),
             'content': forms.Textarea(attrs={'cols': 60, 'rows': 10}),
         }
+
 
 class RegisterUserForm(UserCreationForm):
     username = forms.CharField(label='Логін', widget=forms.TextInput(attrs={'class': 'form-input'}))
@@ -51,3 +53,7 @@ class PostSearchForm(forms.Form):
     search = forms.CharField(label='Пошук', required=False)
     filter = forms.ChoiceField(label='Фільтр', required=False)
     sort = forms.ChoiceField(label='Сортування', required=False)
+
+
+class CommentForm(forms.Form):
+    text = forms.CharField(widget=forms.Textarea)

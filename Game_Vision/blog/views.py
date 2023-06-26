@@ -3,9 +3,9 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, FormView
 
-from .forms import AddPostForm, RegisterUserForm, LoginUserForm, PostSearchForm, UpdatePostForm
+from .forms import *
 from .models import *
 from .utils import DataMixin, SearchMixin
 
@@ -47,16 +47,36 @@ class About(DataMixin, ListView):  # Класс представления ст�
         return dict(list(context.items()) + list(c_def.items()))
 
 
-class ShowPost(DataMixin, DetailView):  # Класс представления страницы поста
+class ShowPost(DataMixin, DetailView, FormView):  # Класс представления страницы поста
     model = Blog
     template_name = 'blog/post.html'
     slug_url_kwarg = 'post_slug'
     context_object_name = 'post'
 
+    form_class = CommentForm
+
+    def get_success_url(self):
+        blog = self.get_object()  # Получить текущий объект поста
+        return reverse_lazy('post', kwargs={'post_slug': blog.slug})
+
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
         c_def = self.get_user_context(title=context["post"])
+
+        # Получение списка комментариев для текущего поста
+        post = self.get_object()
+        comments = Comment.objects.filter(blog=post)
+
+        context['comments'] = comments  # Передача списка комментариев в контекст
+
         return dict(list(context.items()) + list(c_def.items()))
+
+    def form_valid(self, form):
+        blog = self.get_object()
+        author = User.objects.get(username=self.request.user.username)
+        comment = Comment(text=form.cleaned_data['text'], blog=blog, author=author)
+        comment.save()
+        return super().form_valid(form)
 
 
 class BlogCategory(SearchMixin, DataMixin, ListView):  # Класс представления для отображения постов по категориям

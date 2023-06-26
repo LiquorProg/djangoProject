@@ -28,6 +28,38 @@
             </div>
           </div>
 
+          <hr>
+
+          {% if user.is_authenticated %}
+            <!-- Форма для создания нового комментария -->
+            <form method="post" action="{{ request.path }}">
+              {% csrf_token %}
+              <input type="hidden" name="author" value="{{ user.username }}">
+              <textarea name="text" maxlength="200" class="form-control" placeholder="Введіть коментар" rows="3"></textarea>
+              <small class="text-muted">Максимальна довжина: 200 символів</small>
+              <button type="submit" class="btn btn-primary">Залишити коментар</button>
+            </form>
+          {% else %}
+            <p>Щоб залишити коментар, будь ласка, <a href="{% url 'login' %}">увійдіть у систему</a>.</p>
+          {% endif %}
+
+          <hr>
+
+          <!-- Отображение комментариев -->
+          {% if comments %}
+            <h2>Коментарі</h2>
+            <ul class="list-group">
+              {% for comment in comments %}
+                <li class="list-group-item">
+                  <p class="mb-1"><span class="author">{{ comment.author }}</span> <span class="text-muted comment-date">{{ comment.created_at }}</span></p>
+                  <p class="mb-1 comment-text">{{ comment.text }}</p>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="no-posts-message">Немає коментарів.</p>
+          {% endif %}
+
       </div>
     </div>
   </div>

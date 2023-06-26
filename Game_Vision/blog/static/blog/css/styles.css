@@ -75,3 +75,22 @@
     color: #3366cc;
     text-decoration: none;
   }
+
+  .comment-text {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  }
+
+.author {
+  display: inline-block;
+  padding: 5px;
+  background-color: #3498DB; /* Синий цвет фона */
+  color: #FFFFFF; /* Цвет текста (белый) */
+  border: 1px solid #2980B9; /* Обводка вокруг квадрата */
+  border-radius: 3px; /* Закругление углов */
+}
+
+.comment-date {
+  float: right; /* Выравнивание справа */
+  color: #999999; /* Серый цвет для даты написания комментария */
+}
