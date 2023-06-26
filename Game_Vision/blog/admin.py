@@ -18,5 +18,12 @@ class CategoryAdmin(admin.ModelAdmin):
     search_fields = ('name',)
     prepopulated_fields = {"slug": ("name",)}
 
+class CommentAdmin(admin.ModelAdmin):
+    list_display = ('id', 'text', 'author', 'created_at')
+    list_display_links = ('id', 'text')
+    search_fields = ('text', 'author',)
+    # prepopulated_fields = {"slug": ("name",)}
+
 admin.site.register(Blog, BlogAdmin)
 admin.site.register(Category, CategoryAdmin)
+admin.site.register(Comment, admin.ModelAdmin)

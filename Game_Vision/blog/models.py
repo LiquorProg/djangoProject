@@ -48,3 +48,6 @@ class Comment(models.Model):
     text = models.TextField()
     blog = models.ForeignKey(Blog, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.text
