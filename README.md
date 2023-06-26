@@ -1,6 +1,7 @@
 # Game Vision
 
 Welcome to the Video Game Blog!
+You can visit the [Game Vision](https://liquorprog.pythonanywhere.com/) to explore the content.
 
 ## Functionality
 
